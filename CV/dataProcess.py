@@ -6,7 +6,35 @@ import PIL.Image
 train_data_dir = "HWDB1.1trn_gnt"
 test_data_dir = "HWDB1.1tst_gnt"
  
-# 读取图像和对应的汉字
+    
+import numpy as np
+import cv2
+import pandas as pd
+
+#img_raw,label_raw=Read_Data.load_data()
+
+def clean_data(img_raw, label_raw, threshold=25):
+    bool_arr=np.array(map(lambda x:True if (x.shape[0]>threshold or x.shape[1]>threshold) else False,img_raw))
+    return img_raw[bool_arr],label_raw[bool_arr]
+
+def scale_data(img,full_shape=(128,128)):
+    (fh, fw) = full_shape
+    (h, w) = img.shape
+    result = np.full(full_shape,255)
+    result =result.astype(img.dtype)
+    if h>w:
+        img=cv2.resize(img,(int(w*fh/float(h)),fh))
+        (h, w) = img.shape
+        y=0 if (fw-w)==0 else np.random.randint(0,fw-w)
+        result[:,y:img.shape[1]+y]=img
+    else:
+        img=cv2.resize(img,(fw,int(h*fw/float(w))))
+        (h, w) = img.shape
+        x=0 if (fh-h)==0 else np.random.randint(0,fh-h)
+        result[x:img.shape[0]+x,:]=img
+    return result
+
+
 def read_from_gnt_dir(gnt_dir=train_data_dir):
 	def one_file(f):
 		header_size = 10
