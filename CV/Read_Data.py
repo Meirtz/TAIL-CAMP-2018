@@ -1,10 +1,11 @@
 import os
 import numpy as np
+import pandas as pd
 import struct
 import pickle
 from PIL import Image
 
-train_data_dir = 'HWDB1.1trn_gnt_small'
+train_data_dir = 'HWDB1.1trn_gnt'
 test_data_dir = 'HWDB1.1tst_gnt'
 
 def read_from_gnt_dir(gnt_dir=train_data_dir):
@@ -20,7 +21,10 @@ def read_from_gnt_dir(gnt_dir=train_data_dir):
             height = header[8] + (header[9]<<8)
             if header_size + width*height != sample_size:
                 break
-            image = np.fromfile(f, dtype='uint8', count=width*height).reshape((height, width))
+            try:
+                image = np.fromfile(f, dtype='uint8', count=width*height).reshape((height, width))
+            except:
+                break
             yield image, tagcode
     for file_name in os.listdir(gnt_dir):
         if file_name.endswith('.gnt'):
@@ -30,9 +34,10 @@ def read_from_gnt_dir(gnt_dir=train_data_dir):
                     yield image, tagcode
 
 def load_data():
-    img=np.load('img_raw.npy')
-    label=np.load('label_raw.npy')
+    img=np.load('input_raw/img_raw.npy')
+    label=np.load('input_raw/label_raw.npy')
     return img,label
+
 
 if __name__=='__main__':
     char_set = set()
@@ -49,5 +54,5 @@ if __name__=='__main__':
     with open('char_dict', 'wb') as f:
         pickle.dump(char_dict, f)
 
-    np.save('img_raw.npy',img_arr)
-    np.save('label_raw.npy',label_arr)
+    np.save('input_raw/img_raw.npy',img_arr)
+    np.save('input_raw/label_raw.npy',pd.get_dummies(label_arr).values)

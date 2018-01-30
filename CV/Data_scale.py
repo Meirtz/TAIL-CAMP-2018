@@ -1,20 +1,20 @@
 import numpy as np
 import cv2
 import pandas as pd
-import Read_Data
+import Read_data
 from keras.preprocessing import image
 
-img_raw,label_raw=Read_Data.load_data()
+
 
 def clean_data(img_raw,label_raw,threshold=25):
     bool_arr=np.array(map(lambda x:True if (x.shape[0]>threshold or x.shape[1]>threshold) else False,img_raw))
     return img_raw[bool_arr],label_raw[bool_arr]
 
-def scale_data(img,full_shape=(128,128)):
+def scale_data(img,full_shape=(129,129)):
     def pad_data(img):
         (fh, fw) = full_shape
         (h, w) = img.shape
-        result = np.full(full_shape,255)
+        result = np.full(full_shape,0)
         result =result.astype(img.dtype)
         if h>w:
             img=cv2.resize(img,(int(w*fh/float(h)),fh))
@@ -28,6 +28,7 @@ def scale_data(img,full_shape=(128,128)):
             result[x:img.shape[0]+x,:]=img
         return result.reshape(fh,fw,1)
     return np.array(map(pad_data,img))
+
 
 class augment_class(object):
     def __init__(self):
@@ -62,5 +63,7 @@ def augment_data(img):
 
 
 if __name__=='__main__':
-    img=scale_data=scale_data(img_raw)
-    augment_data(img)
+    img_raw,label_raw=Read_data.load_data()
+    img,label=clean_data(img_raw,label_raw)
+    img=scale_data(img)
+    img,img_rotate,img_shear=augment_data(img)
